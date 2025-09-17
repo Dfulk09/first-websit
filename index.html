@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Arcade — A Ton of Games</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;color-scheme:dark}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071226 0%, #0f1724 100%);font-family:Inter,system-ui,Arial,sans-serif;color:#e6eef6}
+    .app{max-width:1100px;margin:24px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:1.6rem}
+    nav{display:flex;gap:8px;flex-wrap:wrap}
+    button, .tab {background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    canvas{display:block;border-radius:8px;background:#071226}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .small{font-size:0.85rem;padding:6px 8px}
+    .linklike{background:transparent;border:none;color:var(--accent);cursor:pointer}
+    footer{margin-top:18px;color:var(--muted);font-size:0.9rem}
+    /* Tic-tac-toe */
+    .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:210px}
+    .cell{background:rgba(255,255,255,0.02);height:70px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;border-radius:8px;cursor:pointer}
+    /* Memory */
+    .deck{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .card-face{height:70px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer}
+    .hidden{background:linear-gradient(90deg,#0b1220,#091124);}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Arcade — Playable directly on GitHub Pages</h1>
+        <div style="color:var(--muted);font-size:0.95rem">A starter collection of lightweight HTML games you can expand.</div>
+      </div>
+      <div style="margin-left:auto"> <!-- placeholder for future account links --> </div>
+    </header>
+
+    <nav style="margin-top:16px">
+      <button class="tab" data-target="home">Home</button>
+      <button class="tab" data-target="tic">Tic-Tac-Toe</button>
+      <button class="tab" data-target="snake">Snake</button>
+      <button class="tab" data-target="pong">Pong</button>
+      <button class="tab" data-target="memory">Memory</button>
+      <button class="tab" data-target="more">More / Add</button>
+    </nav>
+
+    <main id="main" style="margin-top:18px">
+      <section id="home" class="card">
+        <h2 style="margin-top:0">Welcome</h2>
+        <p style="color:var(--muted)">This single-file static site contains multiple small games implemented in plain JavaScript so you can push it straight to GitHub Pages (no build step required). Use the tabs above to switch between games.</p>
+        <div class="grid">
+          <div class="card">
+            <h3>Included games</h3>
+            <ul>
+              <li>Tic-Tac-Toe (2 players / vs CPU)</li>
+              <li>Snake (keyboard)</li>
+              <li>Pong (2 player local)</li>
+              <li>Memory (card match)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>How to publish</h3>
+            <ol style="color:var(--muted)">
+              <li>Create a new GitHub repo (public or private)</li>
+              <li>Add a file named <code>index.html</code> with this content and push to <code>main</code></li>
+              <li>In the repo settings > Pages, select Branch: <code>main</code> / folder: <code>/ (root)</code> — the site will be live at <code>https://&lt;username&gt;.github.io/&lt;repo&gt;</code></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="tic" class="card" style="display:none">
+        <h2>Tic‑Tac‑Toe</h2>
+        <div style="display:flex;gap:18px;align-items:flex-start">
+          <div>
+            <div id="tttBoard" class="ttt"></div>
+            <div class="controls"><button id="tttReset" class="small">Reset</button><button id="tttToggleAI" class="small">Toggle vs CPU</button></div>
+          </div>
+          <div style="color:var(--muted)">
+            <p id="tttStatus">Turn: X</p>
+            <p>Click a square to play. Versus-CPU uses a simple random move (easy).</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="snake" class="card" style="display:none">
+        <h2>Snake</h2>
+        <canvas id="snakeCanvas" width="420" height="300"></canvas>
+        <div class="controls"><button id="snakeStart" class="small">Start</button><button id="snakeStop" class="small">Stop</button><div style="margin-left:auto;color:var(--muted)">Use arrow keys</div></div>
+        <p id="snakeScore" style="color:var(--muted)">Score: 0</p>
+      </section>
+
+      <section id="pong" class="card" style="display:none">
+        <h2>Pong</h2>
+        <canvas id="pongCanvas" width="600" height="320"></canvas>
+        <div class="controls"><button id="pongStart" class="small">Start</button><button id="pongStop" class="small">Stop</button></div>
+        <p style="color:var(--muted)">W/S and ArrowUp/ArrowDown to move paddles.</p>
+      </section>
+
+      <section id="memory" class="card" style="display:none">
+        <h2>Memory — Match Pairs</h2>
+        <div id="deck" class="deck"></div>
+        <div class="controls"><button id="memoryReset" class="small">Shuffle & Reset</button></div>
+        <p id="memoryStatus" style="color:var(--muted)">Matches: 0</p>
+      </section>
+
+      <section id="more" class="card" style="display:none">
+        <h2>More</h2>
+        <p style="color:var(--muted)">This is a starter. Want more games? I can add Tetris, Minesweeper, Connect Four, platformers, or wire this up to a backend for high scores. Tell me which games you want and I’ll add them.</p>
+      </section>
+    </main>
+
+    <footer>
+      <div>Built for GitHub Pages — single-file, static, no build required.</div>
+    </footer>
+  </div>
+
+  <script>
+  // --- Tab navigation ---
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target = btn.dataset.target;
+      document.querySelectorAll('main > section').forEach(s=>s.style.display='none');
+      document.getElementById(target).style.display='block';
+    });
+  });
+
+  // show home by default
+  document.getElementById('home').style.display='block';
+
+  // ---------------- Tic Tac Toe ----------------
+  (function(){
+    const boardEl = document.getElementById('tttBoard');
+    const status = document.getElementById('tttStatus');
+    let board = Array(9).fill(null);
+    let turn = 'X';
+    let vsAI = false;
+    function render(){
+      boardEl.innerHTML='';
+      board.forEach((v,i)=>{
+        const cell = document.createElement('div');
+        cell.className='cell';
+        cell.textContent = v||'';
+        cell.addEventListener('click', ()=>{ if(!v && !isWinner()){ play(i);} });
+        boardEl.appendChild(cell);
+      });
+      const w = winner();
+      if(w){ status.textContent = w==='draw'? 'Draw': 'Winner: '+w; }
+      else status.textContent = 'Turn: '+turn;
+    }
+    function isWinner(){return !!winner()}
+    function winner(){
+      const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      for(const [a,b,c] of lines){ if(board[a] && board[a]===board[b] && board[b]===board[c]) return board[a]; }
+      if(board.every(Boolean)) return 'draw';
+      return null;
+    }
+    function play(i){ if(board[i]) return; board[i]=turn; turn = turn==='X'?'O':'X'; render(); if(vsAI && !isWinner() && turn==='O'){ aiMove(); }}
+    function aiMove(){ const empties = board.map((v,i)=>v?null:i).filter(Boolean); if(empties.length===0) return; const pick = empties[Math.floor(Math.random()*empties.length)]; setTimeout(()=>{ play(pick); },200); }
+    document.getElementById('tttReset').onclick = ()=>{ board=Array(9).fill(null); turn='X'; render(); };
+    document.getElementById('tttToggleAI').onclick = ()=>{ vsAI = !vsAI; document.getElementById('tttToggleAI').textContent = vsAI? 'Playing vs CPU':'Two-player'; };
+    render();
+  })();
+
+  // ---------------- Memory ----------------
+  (function(){
+    const deckEl = document.getElementById('deck');
+    const status = document.getElementById('memoryStatus');
+    const resetBtn = document.getElementById('memoryReset');
+    let cards = [];
+    let first=null, second=null, lock=false, matches=0;
+    const icons = ['🍎','🍌','🍒','🍇','🍉','🍍','🥝','🍑']; // 8 pairs
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } }
+    function setup(){ matches=0; first=second=null; lock=false; cards = icons.concat(icons).map((v,i)=>({id:i, val:v, up:false, matched:false})); shuffle(cards); render(); status.textContent='Matches: 0'; }
+    function render(){ deckEl.innerHTML=''; cards.forEach(c=>{
+      const d = document.createElement('div'); d.className='card-face '+(c.up||c.matched? '':'hidden'); d.textContent = (c.up||c.matched)? c.val : '';
+      d.addEventListener('click', ()=>{ if(lock||c.up||c.matched) return; flip(c.id); }); deckEl.appendChild(d);
+    }); }
+    function flip(id){ const c=cards.find(x=>x.id===id); c.up=true; if(!first) first=c; else if(!second){ second=c; lock=true; check(); } render(); }
+    function check(){ if(first.val===second.val){ first.matched=second.matched=true; matches++; setTimeout(()=>{ resetPick(); status.textContent='Matches: '+matches; if(matches===icons.length) status.textContent+=' — You win!'; },300); } else { setTimeout(()=>{ first.up=second.up=false; resetPick(); },600);} }
+    function resetPick(){ first=second=null; lock=false; render(); }
+    resetBtn.onclick = setup; setup();
+  })();
+
+  // ---------------- Snake ----------------
+  (function(){
+    const canvas = document.getElementById('snakeCanvas'); const ctx = canvas.getContext('2d'); const startBtn=document.getElementById('snakeStart'), stopBtn=document.getElementById('snakeStop'), scoreEl=document.getElementById('snakeScore');
+    const tile = 14; const cols = Math.floor(canvas.width/tile), rows = Math.floor(canvas.height/tile);
+    let snake, dir, food, loopId, running=false, score=0;
+    function reset(){ snake=[{x:5,y:5},{x:4,y:5},{x:3,y:5}]; dir={x:1,y:0}; placeFood(); score=0; scoreEl.textContent='Score: 0'; draw(); }
+    function placeFood(){ food = {x:Math.floor(Math.random()*cols), y:Math.floor(Math.random()*rows)}; }
+    function step(){ const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y}; if(head.x<0||head.y<0||head.x>=cols||head.y>=rows || snake.some(s=>s.x===head.x&&s.y===head.y)){ stop(); return; } snake.unshift(head); if(head.x===food.x && head.y===food.y){ score++; scoreEl.textContent='Score: '+score; placeFood(); } else snake.pop(); draw(); }
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); // snake
+      ctx.fillStyle='rgba(6,182,212,0.9)'; snake.forEach(s=>ctx.fillRect(s.x*tile+1,s.y*tile+1,tile-2,tile-2)); ctx.fillStyle='white'; ctx.fillRect(food.x*tile+2,food.y*tile+2,tile-4,tile-4);
+    }
+    function start(){ if(running) return; running=true; loopId = setInterval(step,110); }
+    function stop(){ running=false; clearInterval(loopId); }
+    document.addEventListener('keydown', e=>{
+      if(e.key==='ArrowUp' && dir.y!==1) dir={x:0,y:-1};
+      if(e.key==='ArrowDown' && dir.y!==-1) dir={x:0,y:1};
+      if(e.key==='ArrowLeft' && dir.x!==1) dir={x:-1,y:0};
+      if(e.key==='ArrowRight' && dir.x!==-1) dir={x:1,y:0};
+    });
+    startBtn.onclick = ()=>{ reset(); start(); };
+    stopBtn.onclick = ()=>{ stop(); };
+    reset();
+  })();
+
+  // ---------------- Pong ----------------
+  (function(){
+    const canvas = document.getElementById('pongCanvas'); const ctx = canvas.getContext('2d'); const startBtn=document.getElementById('pongStart'), stopBtn=document.getElementById('pongStop');
+    let up1=false, down1=false, up2=false, down2=false; let loopId=null;
+    const paddleH=70, paddleW=10; let p1y=125, p2y=125, ball={x:300,y:160,vx:3,vy:2};
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6eef6'; ctx.fillRect(10,p1y,paddleW,paddleH); ctx.fillRect(canvas.width-20,p2y,paddleW,paddleH); ctx.beginPath(); ctx.arc(ball.x,ball.y,7,0,Math.PI*2); ctx.fill(); }
+    function step(){ if(up1) p1y-=5; if(down1) p1y+=5; if(up2) p2y-=5; if(down2) p2y+=5; p1y=Math.max(0,Math.min(canvas.height-paddleH,p1y)); p2y=Math.max(0,Math.min(canvas.height-paddleH,p2y)); ball.x+=ball.vx; ball.y+=ball.vy; if(ball.y<0||ball.y>canvas.height) ball.vy*=-1; // paddle collisions
+      if(ball.x<30 && ball.x>10 && ball.y>p1y && ball.y<p1y+paddleH) ball.vx*=-1.05;
+      if(ball.x>canvas.width-30 && ball.x<canvas.width-10 && ball.y>p2y && ball.y<p2y+paddleH) ball.vx*=-1.05;
+      if(ball.x<0 || ball.x>canvas.width){ ball.x=canvas.width/2; ball.y=canvas.height/2; ball.vx=3*(Math.random()>0.5?1:-1); ball.vy=2; }
+      draw(); }
+    document.addEventListener('keydown',e=>{ if(e.key==='w') up1=true; if(e.key==='s') down1=true; if(e.key==='ArrowUp') up2=true; if(e.key==='ArrowDown') down2=true; });
+    document.addEventListener('keyup',e=>{ if(e.key==='w') up1=false; if(e.key==='s') down1=false; if(e.key==='ArrowUp') up2=false; if(e.key==='ArrowDown') down2=false; });
+    startBtn.onclick = ()=>{ if(loopId) return; loopId = setInterval(step,16); };
+    stopBtn.onclick = ()=>{ clearInterval(loopId); loopId=null; };
+    draw();
+  })();
+  </script>
+</body>
+</html>
