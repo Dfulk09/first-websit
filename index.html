@@ -211,7 +211,137 @@
 
   // ---------------- Pong ----------------
   (function(){
-    const canvas = document.getElementById('pongCanvas'); const ctx = canvas.getContext('2d'); const startBtn=document.getElementById('pongStart'), stopBtn=document.getElementById('pongStop');
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Arcade — A Ton of Games</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;color-scheme:dark}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071226 0%, #0f1724 100%);font-family:Inter,system-ui,Arial,sans-serif;color:#e6eef6}
+    .app{max-width:1100px;margin:24px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:1.6rem}
+    nav{display:flex;gap:8px;flex-wrap:wrap}
+    button, .tab {background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    canvas{display:block;border-radius:8px;background:#071226}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .small{font-size:0.85rem;padding:6px 8px}
+    .linklike{background:transparent;border:none;color:var(--accent);cursor:pointer}
+    footer{margin-top:18px;color:var(--muted);font-size:0.9rem}
+    .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:210px}
+    .cell{background:rgba(255,255,255,0.02);height:70px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;border-radius:8px;cursor:pointer}
+    .deck{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .card-face{height:70px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer}
+    .hidden{background:linear-gradient(90deg,#0b1220,#091124);}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Arcade — Playable directly on GitHub Pages</h1>
+        <div style="color:var(--muted);font-size:0.95rem">A starter collection of lightweight HTML games you can expand.</div>
+      </div>
+      <div style="margin-left:auto"></div>
+    </header>
+
+    <nav style="margin-top:16px">
+      <button class="tab" data-target="home">Home</button>
+      <button class="tab" data-target="tic">Tic-Tac-Toe</button>
+      <button class="tab" data-target="snake">Snake</button>
+      <button class="tab" data-target="pong">Pong</button>
+      <button class="tab" data-target="memory">Memory</button>
+      <button class="tab" data-target="drive">Drive Mad</button>
+      <button class="tab" data-target="more">More / Add</button>
+    </nav>
+
+    <main id="main" style="margin-top:18px">
+      <section id="home" class="card">
+        <h2 style="margin-top:0">Welcome</h2>
+        <p style="color:var(--muted)">This single-file static site contains multiple small games implemented in plain JavaScript so you can push it straight to GitHub Pages (no build step required). Use the tabs above to switch between games.</p>
+      </section>
+
+      <section id="tic" class="card" style="display:none">
+        <h2>Tic‑Tac‑Toe</h2>
+        <div id="tttBoard" class="ttt"></div>
+        <div class="controls"><button id="tttReset" class="small">Reset</button><button id="tttToggleAI" class="small">Toggle vs CPU</button></div>
+        <p id="tttStatus">Turn: X</p>
+      </section>
+
+      <section id="snake" class="card" style="display:none">
+        <h2>Snake</h2>
+        <canvas id="snakeCanvas" width="420" height="300"></canvas>
+        <div class="controls"><button id="snakeStart" class="small">Start</button><button id="snakeStop" class="small">Stop</button></div>
+        <p id="snakeScore" style="color:var(--muted)">Score: 0</p>
+      </section>
+
+      <section id="pong" class="card" style="display:none">
+        <h2>Pong</h2>
+        <canvas id="pongCanvas" width="600" height="320"></canvas>
+        <div class="controls"><button id="pongStart" class="small">Start</button><button id="pongStop" class="small">Stop</button></div>
+        <p style="color:var(--muted)">W/S and ArrowUp/ArrowDown to move paddles.</p>
+      </section>
+
+      <section id="memory" class="card" style="display:none">
+        <h2>Memory — Match Pairs</h2>
+        <div id="deck" class="deck"></div>
+        <div class="controls"><button id="memoryReset" class="small">Shuffle & Reset</button></div>
+        <p id="memoryStatus" style="color:var(--muted)">Matches: 0</p>
+      </section>
+
+      <section id="drive" class="card" style="display:none">
+        <h2>Drive Mad (Simple)</h2>
+        <canvas id="driveCanvas" width="600" height="300"></canvas>
+        <div class="controls"><button id="driveStart" class="small">Start</button><button id="driveStop" class="small">Stop</button></div>
+        <p style="color:var(--muted)">Controls: ↑ accelerate, ↓ brake, ←/→ tilt car. Don’t flip over!</p>
+        <p id="driveStatus" style="color:var(--muted)"></p>
+      </section>
+
+      <section id="more" class="card" style="display:none">
+        <h2>More</h2>
+        <p style="color:var(--muted)">This is a starter. Want more games? I can add Tetris, Minesweeper, Connect Four, platformers, or wire this up to a backend for high scores. Tell me which games you want and I’ll add them.</p>
+      </section>
+    </main>
+
+    <footer>
+      <div>Built for GitHub Pages — single-file, static, no build required.</div>
+    </footer>
+  </div>
+
+  <script>
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target = btn.dataset.target;
+      document.querySelectorAll('main > section').forEach(s=>s.style.display='none');
+      document.getElementById(target).style.display='block';
+    });
+  });
+  document.getElementById('home').style.display='block';
+
+  // --- Drive Mad (simple physics) ---
+  (function(){
+    const canvas=document.getElementById('driveCanvas'); if(!canvas) return; const ctx=canvas.getContext('2d');
+    const startBtn=document.getElementById('driveStart'); const stopBtn=document.getElementById('driveStop'); const status=document.getElementById('driveStatus');
+    let running=false, loopId=null;
+    let car={x:100,y:250,vx:0,vy:0,angle:0,va:0};
+    let keys={};
+    function reset(){ car={x:100,y:250,vx:0,vy:0,angle:0,va:0}; status.textContent=''; }
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#333'; ctx.fillRect(0,260,canvas.width,40); ctx.save(); ctx.translate(car.x,car.y); ctx.rotate(car.angle); ctx.fillStyle='#06b6d4'; ctx.fillRect(-30,-15,60,30); ctx.restore(); }
+    function step(){ if(keys['ArrowUp']) car.vx+=0.1; if(keys['ArrowDown']) car.vx*=0.98; if(keys['ArrowLeft']) car.va-=0.002; if(keys['ArrowRight']) car.va+=0.002; car.x+=car.vx; car.angle+=car.va; if(car.y>260){car.y=260;} if(Math.abs(car.angle)>1.5){status.textContent='Crashed!'; stop();} draw(); if(car.x>canvas.width-50){status.textContent='You win!'; stop();} }
+    function start(){ if(running) return; running=true; reset(); loopId=setInterval(step,16); }
+    function stop(){ running=false; clearInterval(loopId); }
+    document.addEventListener('keydown',e=>{keys[e.key]=true}); document.addEventListener('keyup',e=>{keys[e.key]=false});
+    startBtn.onclick=start; stopBtn.onclick=stop;
+    reset(); draw();
+  })();
+  </script>
+</body>
+</html>
+   const canvas = document.getElementById('pongCanvas'); const ctx = canvas.getContext('2d'); const startBtn=document.getElementById('pongStart'), stopBtn=document.getElementById('pongStop');
     let up1=false, down1=false, up2=false, down2=false; let loopId=null;
     const paddleH=70, paddleW=10; let p1y=125, p2y=125, ball={x:300,y:160,vx:3,vy:2};
     function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6eef6'; ctx.fillRect(10,p1y,paddleW,paddleH); ctx.fillRect(canvas.width-20,p2y,paddleW,paddleH); ctx.beginPath(); ctx.arc(ball.x,ball.y,7,0,Math.PI*2); ctx.fill(); }
